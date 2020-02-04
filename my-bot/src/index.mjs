@@ -37,7 +37,7 @@ bot.registerActionHandler(({ raiseAction, callAction, checkAction, foldAction, a
     // Example, if a check is not possible, the checkAction is undefined
     // Each action contains the name of the action (actionType) and the amount required.
 
-    console.log(`ActionHandler: `, { raiseAction, callAction, checkAction, foldAction, allInAction });
+    console.log('ActionHandler: ', { raiseAction, callAction, checkAction, foldAction, allInAction });
 
     const actions = { raiseAction, callAction, checkAction, foldAction, allInAction };
     const myCards = toSolverHand(bot.getGameState().getMyCards());
