@@ -107,7 +107,7 @@ export const setupGameState = ({ name }) => {
         playerState.table.smallBlindPlayer = event.smallBlindPlayer;
         playerState.table.bigBlindPlayer = event.bigBlindPlayer;
 
-        playerState.amount = getMyPlayer() ? getMyPlayer().chipCount : 0;
+        playerState.amount = getMyPlayer() ? getMyPlayer().chipCount: 0;
 
     });
 

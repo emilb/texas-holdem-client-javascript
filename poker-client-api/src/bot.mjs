@@ -110,7 +110,6 @@ const validateAction = ({ action, possibleActions }) => {
     if (!action) {
         throw new Error(`Undefined action from the request handler [action=${action}, valid=[${Object.values(actions).join(', ')}]]`);
     }
-    
     if (!Object.values(actions).includes(action.actionType)) {
         throw new Error(`Invalid action from the request handler [action=${action.actionType}, valid=[${Object.values(actions).join(', ')}]]`);
     }
