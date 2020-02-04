@@ -28,6 +28,7 @@
         "@cygni/poker-client-api": "^1.0.0",
         "card-deck": "^1.0.1",
         "pokersolver": "^2.1.2",
-        "uuid": "^3.4.0"
+        "uuid": "^3.4.0",
+        "holdem-simulator": "^0.0.1"
     }
 }
