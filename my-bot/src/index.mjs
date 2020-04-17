@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 // This is the home of your bot.
 import simulator from 'holdem-simulator';
-
+import { chenValue } from './chen.mjs';
 import { createBot, events, getNameFromCommandLine, toSolverHand, tableStates } from '@cygni/poker-client-api';
 
 // Create the bot, name it by using the command line argument (yarn play:<env>:<room> player-name)
@@ -81,36 +81,23 @@ bot.registerActionHandler(({ raiseAction, callAction, checkAction, foldAction, a
     console.log(potOdds);
     console.log(`action: ${JSON.stringify(choosenAction)}`);
     return choosenAction;
-    /*
-    const winOrSplit = simulationResult[0] + simulationResult[2];
-    if (simulationResult[0] > 0.85) {
-        const action =  allInAction || raiseAction || callAction || checkAction || foldAction;
-        console.log(`action: ${JSON.stringify(action)}`);
-        return action;
-}
-
-    if (winOrSplit > 0.7) {
-        const action = raiseAction || callAction || checkAction || foldAction;
-        console.log(`action: ${JSON.stringify(action)}`);
-        return action;
-    }
-
-    if (winOrSplit > 0.3) {
-        const action =  checkAction || callAction;
-        console.log(`action: ${JSON.stringify(action)}`);
-        return action;
-    }
-    else {
-        const action =  checkAction || foldAction;
-        console.log(`action: ${JSON.stringify(action)}`);
-        return action;
-    }
-*/
 });
 
 const preFlopState = ({ raiseAction, callAction, checkAction, foldAction, allInAction },
     simulationResult, potOdds) => {
 
+    const winChance = simulationResult[0];
+    const currentChenValue = chenValue(bot.getGameState().getMyCards());
+    
+    if (currentChenValue < 7 && winChance < potOdds) {
+        return checkAction || foldAction;
+    }
+    
+    if (winChance > potOdds * 1.1 && currentChenValue > 11)
+        return raiseAction || callAction || checkAction || foldAction;
+    else 
+        return checkAction || callAction || raiseAction || foldAction;
+    /*
     const winChance = simulationResult[0];
     // If I am small blind and the odds are acceptable call
     if (bot.getGameState().amISmallBlindPlayer() && callAction && winChance > potOdds) {
@@ -127,38 +114,53 @@ const preFlopState = ({ raiseAction, callAction, checkAction, foldAction, allInA
 
     // fold
     return foldAction;
+    */
 };
 
 const flopState = ({ raiseAction, callAction, checkAction, foldAction, allInAction },
     simulationResult, potOdds, raiseOdds) => {
 
     const winChance = simulationResult[0];
+    const currentChenValue = chenValue(bot.getGameState().getMyCards());
 
     // Good chance for winning, lets go All in!
-    if (winChance > 0.92) {
+    if (winChance > 0.65) {
         return allInAction;
     }
 
-    // If the odds are acceptable call
-    if (callAction && winChance > potOdds * 1.2) {
-        return callAction;
+    if (raiseAction && winChance > 0.59) {
+        return raiseAction;
+    }
+
+    if (bot.getGameState().getMyInvestmentInPot() > bot.getGameState().getBigBlindAmount()*3) {
+        return foldAction;
     }
 
     // Always safe to check
     if (checkAction)
         return checkAction;
 
-    // Raise if simulation is significantly better than potOdds
-    if (raiseAction && winChance > 0.8)
+    // If the odds are acceptable call
+    if (callAction && winChance > potOdds * 1.2) {
+        return callAction;
+    }
+
+ 
+
+    // Raise if simulation is good chance of winning
+    if (raiseAction && winChance > 0.62)
         return raiseAction;
+
 
     // If the stakes are getting high and a Call costs more than half my
     // chips left. Bail
+    /*
     if (callAction &&
         winChance < 0.7 &&
         bot.getGameState().getMyChips() / 2 < callAction.amount) {
         return foldAction;
     }
+    */
 
     // If I still have a good chance of winning and my investement in the pot
     // is large I can't just bail out now. 
